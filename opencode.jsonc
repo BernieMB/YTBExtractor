@@ -1,0 +1,120 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    // General settings
+    "share": "disabled",
+    "model": "github-copilot/claude-sonnet-4.5",
+    "small_model": "github-copilot/grok-code-fast-1",
+    // Disabled providers
+    "disabled_providers": [
+        "anthropic",
+        "zhipuai"
+    ],
+    "provider": {
+        "github-copilot": {
+            "models": {
+                "gemini-2.5-pro": {
+                    "limit": { "context": 1048576, "output": 65536 }
+                },
+                "gemini-3-pro-preview": {
+                    "limit": { "context": 1000000, "output": 64000 }
+                },
+                "claude-3.5-sonnet": {
+                    "limit": { "context": 200000, "output": 8192 }
+                },
+                "claude-sonnet-4": {
+                    "limit": { "context": 200000, "output": 64000 }
+                },
+                "claude-sonnet-4.5": {
+                    "limit": { "context": 200000, "output": 32000 }
+                },
+                "claude-sonnet-4.6": {
+                    "limit": { "context": 200000, "output": 32000 }
+                },
+                "claude-opus-4.5": {
+                    "limit": { "context": 200000, "output": 64000 }
+                },
+                "claude-opus-4.6": {
+                    "limit": { "context": 400000, "output": 128000 }
+                },
+                "claude-haiku-4.5": {
+                    "limit": { "context": 200000, "output": 64000 }
+                },
+                "grok-code-fast-1": {
+                    "limit": { "context": 256000, "output": 256000 }
+                },
+                "gpt-5": {
+                    "limit": { "context": 400000, "output": 128000 }
+                },
+                "gpt-5-mini": {
+                    "limit": { "context": 400000, "output": 128000 }
+                },
+                "gpt-5-codex": {
+                    "limit": { "context": 400000, "output": 128000 }
+                },
+                "gpt-4.1": {
+                    "limit": { "context": 1047576, "output": 32768 }
+                },
+                "gpt-4o": {
+                    "limit": { "context": 128000, "output": 16384 }
+                }
+            },
+            "options": {
+                "timeout": 3000000,
+                "chunkTimeout": 3000000
+            }
+        },
+        "ollama": {
+            "npm": "@ai-sdk/openai-compatible",
+            "options": {
+                "baseURL": "http://localhost:11434/v1"
+            },
+            "models": {
+                "granite3.3:8b": {
+                    "tool_call": true
+                },
+                "qwen3:8b": {
+                    "tool_call": true,
+                    "reasoning": true,
+                    "options": {
+                        "temperature": 0.1,
+                        "top_p": 0.9,
+                        "max_tokens": 4096
+                    }
+                },
+                "qwen3:4b": {
+                    "tool_call": true,
+                    "reasoning": true,
+                    "options": {
+                        "temperature": 0.1,
+                        "top_p": 0.9,
+                        "max_tokens": 262144
+                    }
+                },
+                "hf.co/lmstudio-community/Qwen3-4B-Instruct-2507-GGUF:Q4_K_M": {
+                    "tool_call": true,
+                    "reasoning": true,
+                }
+            }
+        }
+    },
+    "mcp": {
+        "databases": { "type": "local", "command": [""], "enabled": false },
+        "playwright": { "type": "local", "command": [""], "enabled": false },
+        "repomix": { "type": "local", "command": [""], "enabled": false },
+        "sqlite_logs": {
+            "type": "local",
+            "command": [ "uv", "run", "mcp-server-sqlite", "--db-path", "./logs.db"],
+            "enabled": false
+        },
+        "sqlite_filtered": {
+            "type": "local",
+            "command": [ "uv", "run", "mcp-server-sqlite", "--db-path", "./filtered.db"],
+            "enabled": false
+        },
+        "sqlite_filtered_scored": {
+            "type": "local",
+            "command": [ "uv", "run", "mcp-server-sqlite", "--db-path", "./filtered_scoring.db" ],
+            "enabled": true
+        },
+    }
+}
