@@ -71,7 +71,55 @@ Las opciones disponibles son:
 | --- | --- | --- |
 | `-f`, `--format` | `mp3`, `mp4`, `both` | Formato de salida. Por defecto: `mp3`. |
 | `-o`, `--output` | nombre base | Nombre del archivo sin extensión. Por defecto: fecha y hora actuales. |
+| `--from` | segundos o `minutos:segundos` | Instante inicial del fragmento. Por defecto: `0`. |
+| `--to` | segundos o `minutos:segundos` | Instante final del fragmento. Por defecto: final del video. |
 | `-h`, `--help` | - | Muestra la ayuda del programa. |
+
+### Descargar un fragmento
+
+Usa `--from` y `--to` para guardar solo un intervalo. Ambos parámetros son opcionales y funcionan con `mp3`, `mp4` y `both`.
+
+Los tiempos son posiciones dentro del video original: `--from 30 --to 90` genera un fragmento de **60 segundos**, no de 90.
+
+```bash
+# MP3 desde el segundo 30 hasta el segundo 90
+uv run ytb_extractor.py "https://www.youtube.com/watch?v=VIDEO_ID" -f mp3 --from 30 --to 90 -o fragmento
+
+# MP4 desde 1:30 hasta 2:45
+uv run ytb_extractor.py "https://www.youtube.com/watch?v=VIDEO_ID" -f mp4 --from 1:30 --to 2:45 -o fragmento
+
+# MP3 y MP4 desde el minuto 2 hasta el final
+uv run ytb_extractor.py "https://www.youtube.com/watch?v=VIDEO_ID" -f both --from 2:00 -o fragmento
+
+# Solo los primeros 45 segundos (MP3 por defecto)
+uv run ytb_extractor.py "https://www.youtube.com/watch?v=VIDEO_ID" --to 45 -o inicio
+```
+
+Estos comandos de una línea también se pueden ejecutar en PowerShell.
+
+Formatos de tiempo aceptados:
+
+| Entrada | Equivalencia |
+| --- | --- |
+| `90` | 90 segundos |
+| `1:30` | 90 segundos |
+| `12:05` | 725 segundos |
+| `90.5` o `1:30.5` | 90,5 segundos |
+
+Los minutos pueden superar `59`. Después de `:`, los segundos deben ser menores que `60`. Se rechazan valores negativos, texto y formatos como `1:60` o `1:02:03`. Para los decimales se utiliza el punto.
+
+Antes de descargar un fragmento, el programa consulta la duración del video y aplica estas reglas:
+
+- Si no se indica `--from`, empieza en el segundo `0`.
+- Si no se indica `--to`, termina al final del video.
+- Si `--from` es igual o mayor que la duración total, no guarda contenido.
+- Si `--to` es igual o menor que `--from`, no guarda contenido.
+- Si `--to` supera la duración total, lo ajusta al final real y muestra el ajuste en pantalla.
+- Si no puede conocer la duración, o se trata de una lista de reproducción, un directo o un video todavía no emitido, detiene el recorte con un mensaje de error.
+
+Los intervalos inválidos terminan con un código de salida distinto de cero, sin generar archivos multimedia. Con `both`, la validación se realiza antes de comenzar cualquiera de las dos descargas.
+
+FFmpeg recodifica los fragmentos para realizar cortes precisos; esto requiere más procesamiento que copiar los streams. La duración final puede variar ligeramente por los fotogramas y bloques de audio del formato. Si no se indica ninguno de los dos parámetros, se descarga el contenido completo como antes.
 
 ### Nombre y carpeta de salida
 
@@ -108,13 +156,24 @@ Muestra la ayuda de la aplicación sin descargar ningún video:
 uv run ytb_extractor.py --help
 ```
 
-La salida debe mostrar los formatos `mp3`, `mp4` y `both`, además de las opciones `--output` y `--format`.
+La salida debe mostrar los formatos `mp3`, `mp4` y `both`, además de las opciones `--output`, `--format`, `--from` y `--to`.
+
+### Pruebas
+
+Ejecuta las pruebas con la biblioteca estándar de Python:
+
+```bash
+uv run python -m unittest -v
+```
+
+Incluyen validación de tiempos y límites, comprobación de que los rangos inválidos no descargan contenido y recortes reales con archivos sintéticos servidos localmente. Las pruebas de medios requieren FFmpeg y ffprobe en el `PATH`; si no están disponibles, se omiten esas pruebas. No es necesario acceder a YouTube para ejecutarlas.
 
 ## Estructura relevante
 
 ```text
 .
 ├── ytb_extractor.py  # CLI y lógica de descarga
+├── test_ytb_extractor.py # Pruebas de intervalos y recortes de medios
 ├── pyproject.toml    # Metadatos y dependencias del proyecto
 ├── uv.lock           # Versiones bloqueadas de las dependencias
 ├── .python-version   # Versión de Python: 3.12
